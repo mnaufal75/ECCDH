@@ -26,11 +26,4 @@ public class Curve {
     public void printCurve() {
         System.out.println(getA() + " " + getB() + " " + getP());
     }
-
-    public static void main(String[] args) {
-        BigInteger a = BigInteger.valueOf(1);
-        BigInteger b = BigInteger.valueOf(128);
-        BigInteger p = BigInteger.valueOf(3);
-        System.out.println(b.multiply(BigInteger.valueOf(2)));
-    }
 }
