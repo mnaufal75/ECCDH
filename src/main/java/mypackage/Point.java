@@ -1,24 +1,26 @@
-package mypackage;
+// package mypackage;
+
+import java.math.BigInteger;
 
 public class Point {
-    private int x;
-    private int y;
+    private BigInteger x;
+    private BigInteger y;
 
     public Point() {
-        this.x = 0;
-        this.y = 0;
+        this.x = BigInteger.ZERO;
+        this.y = BigInteger.ZERO;
     }
 
-    public Point(int x, int y) {
+    public Point(BigInteger x, BigInteger y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
+    public BigInteger getX() {
         return x;
     }
 
-    public int getY() {
+    public BigInteger getY() {
         return y;
     }
 

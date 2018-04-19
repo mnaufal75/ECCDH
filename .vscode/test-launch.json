@@ -1,0 +1,22 @@
+{
+    "run": [
+        {
+            "name": "gs-maven",
+            "projectName": "gs-maven",
+            "workingDirectory": "c:\\Users\\mnaufal75\\Project\\ECCDH",
+            "args": [],
+            "vmargs": [],
+            "preLaunchTask": ""
+        }
+    ],
+    "debug": [
+        {
+            "name": "gs-maven",
+            "projectName": "gs-maven",
+            "workingDirectory": "c:\\Users\\mnaufal75\\Project\\ECCDH",
+            "args": [],
+            "vmargs": [],
+            "preLaunchTask": ""
+        }
+    ]
+}

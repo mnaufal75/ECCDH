@@ -1,112 +1,86 @@
-package mypackage;
+// package mypackage;
 
 import java.util.*;
-import java.awt.Point;
 import java.math.BigInteger;
 
 public class ECCDH {
-    int charToNumber(Character ch) {
-        if (Character.isDigit(ch)) {
-            return (int) ch - 48;
-        } else if (Character.isAlphabetic(ch)) {
-            return (int) ch - 54;
-        }
+    BigInteger generatePrivateKey(BigInteger n) {
+        return new BigInteger(256, new Random()).mod(n.subtract(BigInteger.ONE)).add(BigInteger.ONE);
     }
 
-    Character numberToChar(int number) {
-        if (number <= 9) {
-            return Character.toString((char) (number + 48));
-        } else {
-            return Character.toString((char) (number + 54));
-        }
+    Point generatePublicKey(Curve c) {
+        return new Point();
     }
 
     Point additionPoint(Point p, Point q, Curve c) {
-        int xr, yr;
-        int gradien = (p.getY() - q.getY()) / (p.getX() - q.getX());
-        xr = gradien * gradien - p.getX() - q.getX();
-        yr = gradien * (p.getX() - xr) - p.getY();
+        BigInteger xr, yr;
+
+        // BigInteger gradien = (p.getY() - q.getY()) / (p.getX() - q.getX());
+        // xr = gradien.pow(2) - p.getX() - q.getX();
+        // yr = gradien * (p.getX() - xr) - p.getY();
+
+        BigInteger deltaY = p.getY().subtract(q.getY());
+        BigInteger deltaX = p.getX().subtract(q.getX());
+ 
+        BigInteger gradien = deltaX.modInverse(c.getP()).multiply(deltaY).mod(c.getP());
+
+        xr = (gradien.pow(2).subtract(p.getX()).subtract(q.getX())).mod(c.getP());
+        yr = (gradien.multiply((p.getX().subtract(xr))).subtract(p.getY())).mod(c.getP());
+
         return new Point(xr, yr);
     }
 
     Point doublePoint(Point p, Curve c) {
-        int xr, yr;
-        int gradien = (3 * p.getX() * p.getX() + c.getA()) / (2 * p.getY());
-        xr = gradien * gradien - 2 * p.getX();
-        yr = gradien * (p.getX() - xr) - p.getY();
+        BigInteger xr, yr;
+
+        // int gradien = (3 * p.getX() * p.getX() + c.getA()) / (2 * p.getY());
+        // xr = gradien * gradien - 2 * p.getX();
+        // yr = gradien * (p.getX() - xr) - p.getY();
+
+        BigInteger gradien = (BigInteger.valueOf(3).multiply(p.getX().pow(2)).add(c.getA())).divide(BigInteger.TWO.multiply(p.getY()));
+        xr = (gradien.pow(2)).min(p.getX().multiply(BigInteger.TWO));
+        yr = gradien.multiply((p.getX().min(xr))).min(p.getY());
         return new Point(xr, yr);
     }
 
-    Point multiplePoint(Point p, int k, Curve c) {
-        if (k == 1) {
+    Point multiplePoint(Point p, BigInteger k, Curve c) {
+        // if (k.equals(BigInteger.ONE)) {
+        //     return p;
+        // } else if (k.equals(BigInteger.TWO)) {
+        //     return doublePoint(p, c);
+        // } else {
+        //     return additionPoint(doublePoint(p, c), multiplePoint(p, k.min(BigInteger.TWO), c), c);
+        // }
+        if (k.equals(BigInteger.ONE)) {
             return p;
-        } else if (k == 2) {
+        } else if (k.equals(BigInteger.TWO)) {
             return doublePoint(p, c);
-        } else {
-            return additionPoint(doublePoint(p, c), multiplePoint(p, k - 2, c), c);
+        } else if (k.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+            return doublePoint(multiplePoint(p, k.divide(BigInteger.TWO), c), c);
+        } else if (k.mod(BigInteger.TWO).equals(BigInteger.ONE)) {
+            return additionPoint(doublePoint(multiplePoint(p, k.divide(BigInteger.TWO), c), c), p, c);
         }
+        return new Point(BigInteger.ZERO, BigInteger.ZERO);
     }
 
-    // Point residueModulo(int chNumber, Curve c, int koblitzBase) {
-    //     boolean found = false;
-    //     int i = 1;
-    //     Point p = new Point();
-
-    //     while (i < koblitzBase && !found) {
-    //         int x = chNumber * koblitzBase + i;
-    //         int y = 0;
-    //         while (y < c.getP() && !found) {
-    //             if (y*y % c.getP() == (x*x*x + c.getA()*x + c.getB()) % c.getP()) {
-    //                 found = true;
-    //                 p = new Point(x, y);
-    //             }
-    //             y++;
-    //         }
-    //         i++;
-    //     }
-    //     return p;
-    // }
-
-    // List<Point> koblitzEncoding(String messages, Curve c, int koblitzBase) {
-    //     List<Point> myList = new ArrayList<>();
-
-    //     for (Character message : messages.toCharArray()) {
-    //         myList.add(new ECCDH().residueModulo(charToNumber(message), c, koblitzBase));
-    //     }
-
-    //     return myList;
-    // }
-
-    // String koblitzDecoding(List<Point> decoded, Curve c, int koblitzBase) {
-    //     String message = "";
-
-    //     for (Point points : decoded) {
-    //         Char a = new ECCDH().numberToChar(points.getX());
-    //     }
-
-    //     return message;
-    // }
-
-    // public int encrypt(String messages, Curve c, Point basePoint) {
-    //     return 0;
-    // }
-
-    // public int decrypt(String messages, Curve c, Point basePoint) {
-    //     return 0;
-    // }
-
     public static void main(String[] args) {
+        // Test awal
         System.out.println("Hello world");
-        Point p = new Point(2, 4);
-        Point q = new Point(0, 2);
-        Curve c = new Curve(-1, 188, 751);
+
         ECCDH ecc = new ECCDH();
-        // ecc.additionPoint(p, q, c).printPoint();
-        // ecc.doublePoint(p, c).printPoint();
-        // a.multiplePoint(p, 10, c).printPoint();
-        List<Point> hoho = ecc.koblitz("Hello", c, 4);
-        for (Point po: hoho) {
-            po.printPoint();
-        }
+
+        BigInteger _p = new BigInteger ("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16);
+        BigInteger _a = new BigInteger ("ffffffff00000001000000000000000000000000fffffffffffffffffffffffc", 16);
+        BigInteger _b = new BigInteger ("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16);
+        BigInteger _xG = new BigInteger ("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16);
+        BigInteger _yG = new BigInteger ("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16);
+        BigInteger _n = new BigInteger ("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16);
+
+        Curve c = new Curve(_a, _b, _p);
+        BigInteger privateKey = ecc.generatePrivateKey(_n);
+        Point publicKey = ecc.multiplePoint(new Point(_xG, _yG), privateKey, c);
+
+        System.out.println(privateKey);
+        publicKey.printPoint();
     }
 }
